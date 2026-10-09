@@ -1,39 +1,65 @@
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:282c34,100:e4bf7a&height=180&section=header&text=Samuel%20Geraldo&fontSize=42&fontColor=ffffff&fontAlignY=38&desc=Data%20Analytics%20%7C%20Data%20Science&descAlignY=58" width="100%" alt="Samuel Geraldo"/>
+# Bank Customer Classification for Time Deposit — Lead Scoring Model
 
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=E4BF7A&center=true&vCenter=true&width=520&lines=Mencari+magang+Data+Analyst+%2F+Data+Scientist;Customer+%26+Market+Analytics;Dari+data+mentah+ke+keputusan" alt="Typing intro"/>
-</p>
+Final project Data Science Basic Study Club (Veterantech). Model klasifikasi yang memberi **skor probabilitas** tiap nasabah untuk berlangganan deposito berjangka, sehingga tim telemarketing bisa fokus ke ~20% nasabah paling potensial, bukan cold calling massal.
 
-## 💫 About Me
-🎓 Mahasiswa Sistem Informasi, UPN Veteran Jakarta<br>
-🔍 Fokus pada analitik pelanggan dan pasar: RFM, cohort, dan analisis saham<br>
-📍 Jakarta
+## Masalah & tujuan
+- Cold calling menghasilkan konversi rendah dan biaya operasional tinggi.
+- Tujuan bisnis: efisiensi telemarketing naik (kurangi panggilan ke nasabah non-potensial).
+- Tujuan teknis: model klasifikasi stabil dengan Precision >80% dan identifikasi faktor penentu keputusan nasabah.
 
-## 🌐 Socials
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?logo=linkedin&logoColor=white)](https://linkedin.com/in/samuel-geraldo)
-[![Email](https://img.shields.io/badge/Email-D14836?logo=gmail&logoColor=white)](mailto:samuelgeraldo234@gmail.com)
+## Data
+`data/bank.csv` — 11.162 baris (tidak ada duplikat), 16 fitur + target `deposit` (47,4% Yes). Dataset publik Bank Marketing. Nilai kosong ada di `pdays` (-1 = belum pernah dihubungi), `contact`, `education`, `job` ("unknown").
 
-## 🚀 Projects
-[![RFM Cohort](https://github-readme-stats.shion.dev/api/pin/?username=samuel-geraldo&repo=rfm-cohort-ecommerce&theme=onedark)](https://github.com/samuel-geraldo/rfm-cohort-ecommerce)
-[![Analisis Pangan IDX](https://github-readme-stats.shion.dev/api/pin/?username=samuel-geraldo&repo=analisis-pangan-idx&theme=onedark)](https://github.com/samuel-geraldo/analisis-pangan-idx)
+## Alur
+1. **Split dulu** (80/20, stratified), baru preprocessing -> tidak ada data leakage.
+2. **Preprocessing dalam `Pipeline`:** "unknown" -> modus, `pdays=-1` -> median, IQR capping `balance`, StandardScaler, One-Hot Encoding. Semua dipelajari hanya dari data train.
+3. **Fitur tambahan:** `contacted_before` (pernah dihubungi di kampanye sebelumnya) dan `has_loan_any` (punya KPR atau pinjaman pribadi).
+4. **Model:** Logistic Regression (baseline), Random Forest, dan Gradient Boosting (final).
+5. **Evaluasi:** Precision, Recall, ROC-AUC, plus **capture rate, precision, dan lift di Top 20%**, semuanya dengan interval kepercayaan 95% (bootstrap).
 
-- **RFM & Cohort:** 14% customer menyumbang 51,5% revenue
-- **Saham Pangan IDX:** lonjakan besar, tapi belum signifikan secara statistik (p > 0,05)
+## Hasil (test set, 2.233 nasabah, tanpa `duration`)
+| Metrik | Logistic Reg. | Random Forest | Gradient Boosting (final) |
+|---|---|---|---|
+| ROC-AUC | 0,745 | 0,757 | 0,766 (CI 0,747–0,786) |
+| Precision (ambang 0,5) | 0,722 | 0,769 | 0,779 |
+| Recall (ambang 0,5) | 0,547 | 0,547 | 0,555 |
+| Precision Top 20% | 0,857 | 0,850 | 0,874 (CI 0,841–0,904) |
+| Capture Top 20% | 36,1% | 35,8% | 36,9% |
+| Lift Top 20% | 1,81x | 1,79x | 1,85x |
 
-## 💻 Tech Stack
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![pandas](https://img.shields.io/badge/pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
-![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=for-the-badge&logo=jupyter&logoColor=white)
-![Power BI](https://img.shields.io/badge/Power%20BI-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)
-![Matplotlib](https://img.shields.io/badge/Matplotlib-11557c?style=for-the-badge)
-![Seaborn](https://img.shields.io/badge/Seaborn-4c72b0?style=for-the-badge)
-![Git](https://img.shields.io/badge/Git-F05033?style=for-the-badge&logo=git&logoColor=white)
-![GitHub](https://img.shields.io/badge/GitHub-121011?style=for-the-badge&logo=github&logoColor=white)
+![Kurva gain](reports/gain_curve.png)
 
-## 📊 GitHub Stats
-![](https://github-readme-stats.shion.dev/api?username=samuel-geraldo&theme=onedark&hide_border=false&include_all_commits=false&count_private=false)<br>
-![](https://streak-stats.demolab.com/?user=samuel-geraldo&theme=onedark&hide_border=false)
+**Cara membaca:** menelepon hanya 20% nasabah dengan skor tertinggi menghasilkan ±87% yang benar-benar deposit (vs ±47% jika acak) dan menangkap ±37% dari semua nasabah potensial.
 
-## 📈 Data Stats
-<img src="data-stats.svg" width="540" alt="Samuel's Data Stats"/>
+**Target Precision >80%:** dicapai pada ambang skor 0,56 (dipilih dari cross-validation di data train, bukan test). Di test set: precision 82,4% dengan menelepon 29,8% nasabah dan menangkap 51,8% nasabah potensial.
+
+**Faktor terpenting** (permutation importance): bulan kontak, hasil kampanye sebelumnya (`poutcome`), punya pinjaman, usia, dan saldo.
+
+## Catatan kejujuran: perbedaan antar model kecil
+Dalam 5-fold CV berulang 3x di data train, ROC-AUC ketiga model berkisar 0,748–0,759 dengan simpangan baku ±0,01. Selisih Gradient Boosting vs Random Forest hanya ±0,001 pada AUC (tidak signifikan, p=0,25) dan ±0,005 pada precision Top 20% (p=0,09). Interval kepercayaan ketiga model saling tumpang tindih, jadi jangan membaca selisih di tabel di atas sebagai kemenangan yang pasti. Kesimpulan yang aman: **ketiga model setara, dan batas performa ada pada data, bukan pada pilihan algoritma**. Gradient Boosting dipilih sebagai model final karena sedikit unggul dan stabil di CV.
+
+## Catatan penting: fitur `duration`
+`duration` (lama telepon) baru diketahui **setelah** telepon selesai, jadi tidak tersedia saat memutuskan siapa yang ditelepon. Jika dipakai, ROC-AUC naik ke ±0,91, tetapi angka itu terlalu optimis untuk lead scoring nyata. Default-nya **dikeluarkan** (`USE_DURATION = False` di `src/lead_scoring.py`).
+
+## Keterbatasan
+- Dataset ini kampanye masa lalu: nasabah yang dihubungi bukan sampel acak dari seluruh nasabah (selection bias), sehingga performa di kampanye baru bisa berbeda.
+- Tidak ada informasi biaya per panggilan, jadi penghematan belum dihitung dalam rupiah.
+
+## Cara menjalankan
+```bash
+pip install -r requirements.txt
+python src/lead_scoring.py
+```
+Output: tabel metrik di terminal dan di `reports/` (metrics.csv, confusion matrix, kurva gain, feature importance).
+
+## Struktur
+```
+docs/FP_TSC_Bank_Lead_Scoring_Samuel_Geraldo.pptx   # slide presentasi (ringkasan proyek)
+notebooks/FP_Samuel_Geraldo.ipynb   # analisis lengkap dengan output (Colab)
+src/lead_scoring.py                 # pipeline versi skrip
+data/bank.csv
+reports/                            # metrik dan grafik hasil run
+requirements.txt
+```
+
+Analisis lengkap (Business Understanding sampai Evaluation) ada di notebook; `src/lead_scoring.py` adalah versi skrip dari pipeline yang sama, dan slide presentasi ada di `docs/`. Angka kecil bisa sedikit berbeda antar-run karena versi library.
