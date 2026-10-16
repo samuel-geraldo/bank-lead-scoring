@@ -8,7 +8,7 @@ Final project Data Science Basic Study Club (Veterantech). Model klasifikasi yan
 - Tujuan teknis: model klasifikasi stabil dengan Precision >80% dan identifikasi faktor penentu keputusan nasabah.
 
 ## Data
-`data/bank.csv` — 11.162 baris (tidak ada duplikat), 16 fitur + target `deposit` (47,4% Yes). Dataset publik Bank Marketing. Nilai kosong ada di `pdays` (-1 = belum pernah dihubungi), `contact`, `education`, `job` ("unknown").
+`data/bank.csv` — 11.162 baris (tidak ada duplikat), 16 fitur + target `deposit` (47,4% Yes). Dataset publik Bank Marketing (Moro, Cortez & Rita, 2014; [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/222/bank+marketing)), dalam versi 11.162 baris yang beredar di Kaggle. Data dipakai untuk tujuan belajar dan hak ciptanya tetap milik penyusun aslinya; lisensi MIT di repo ini hanya berlaku untuk kode. Nilai kosong ada di `pdays` (-1 = belum pernah dihubungi), `contact`, `education`, `job` ("unknown").
 
 ## Alur
 1. **Split dulu** (80/20, stratified), baru preprocessing -> tidak ada data leakage.
@@ -46,11 +46,14 @@ Dalam 5-fold CV berulang 3x di data train, ROC-AUC ketiga model berkisar 0,748�
 - Tidak ada informasi biaya per panggilan, jadi penghematan belum dihitung dalam rupiah.
 
 ## Cara menjalankan
+Notebook: [![Buka di Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/samuel-geraldo/bank-lead-scoring/blob/main/notebooks/FP_Samuel_Geraldo.ipynb) (data diunduh otomatis dari repo ini, tidak perlu Google Drive).
+
+Skrip (Python 3.11+):
 ```bash
 pip install -r requirements.txt
 python src/lead_scoring.py
 ```
-Output: tabel metrik di terminal dan di `reports/` (metrics.csv, confusion matrix, kurva gain, feature importance).
+Output: tabel metrik di terminal dan di `reports/` (metrics.csv, confusion matrix, kurva gain, feature importance). Versi library di `requirements.txt` dikunci ke versi yang dipakai saat menjalankan ulang skrip ini (Oktober 2026).
 
 ## Struktur
 ```
@@ -58,8 +61,9 @@ docs/FP_TSC_Bank_Lead_Scoring_Samuel_Geraldo.pptx   # slide presentasi (ringkasa
 notebooks/FP_Samuel_Geraldo.ipynb   # analisis lengkap dengan output (Colab)
 src/lead_scoring.py                 # pipeline versi skrip
 data/bank.csv
-reports/                            # metrik dan grafik hasil run
+reports/                            # metrik, confusion matrix, kurva gain, feature importance
 requirements.txt
+LICENSE                             # MIT (kode)
 ```
 
 Analisis lengkap (Business Understanding sampai Evaluation) ada di notebook; `src/lead_scoring.py` adalah versi skrip dari pipeline yang sama, dan slide presentasi ada di `docs/`. Angka kecil bisa sedikit berbeda antar-run karena versi library.
