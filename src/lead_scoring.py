@@ -122,6 +122,12 @@ def load_data():
     return df[FEATURES], y
 
 
+def split_data():
+    """Muat data lalu split 80/20 stratified (dipakai juga oleh ``threshold_table.py``)."""
+    X, y = load_data()
+    return train_test_split(X, y, test_size=0.2, random_state=RANDOM_STATE, stratify=y)
+
+
 def make_preprocessor():
     """Bangun ColumnTransformer: imputasi, capping, scaling, one-hot."""
     numeric_pipe = Pipeline(
@@ -316,10 +322,7 @@ def score_new_customers(model, threshold):
 def main():
     """Latih, evaluasi, dan simpan laporan untuk semua model."""
     REPORT_DIR.mkdir(exist_ok=True)
-    X, y = load_data()
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=RANDOM_STATE, stratify=y
-    )
+    X_train, X_test, y_train, y_test = split_data()
     print(f"Train: {X_train.shape}, Test: {X_test.shape}, USE_DURATION={USE_DURATION}")
 
     models = make_models()
