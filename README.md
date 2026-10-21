@@ -35,6 +35,11 @@ Final project Data Science Basic Study Club (Veterantech). Model klasifikasi yan
 
 **Faktor terpenting** (permutation importance): bulan kontak, hasil kampanye sebelumnya (`poutcome`), punya pinjaman, usia, dan saldo.
 
+## Cara kerja threshold (figur interaktif)
+[![Figur interaktif cara kerja threshold](reports/threshold_figure.png)](https://samuel-geraldo.github.io/bank-lead-scoring/threshold/)
+
+Rak berisi nasabah test set yang disusun menurut skor model; token gelap = nasabah yang benar-benar deposit, dan semua slot di kanan tiang penanda ditelepon. Geser tiang ke kanan: tabung kiri (yang ditelepon) makin sedikit tapi makin gelap, artinya precision naik, sedangkan tabung kanan (semua nasabah potensial) makin banyak yang pudar, artinya recall turun. Klik gambar untuk versi interaktif; angkanya dibaca dari `reports/threshold_table.json` (dibuat oleh `src/threshold_table.py`).
+
 ## Catatan kejujuran: perbedaan antar model kecil
 Dalam 5-fold CV berulang 3x di data train, ROC-AUC ketiga model berkisar 0,748–0,759 dengan simpangan baku ±0,01. Selisih Gradient Boosting vs Random Forest hanya ±0,001 pada AUC (tidak signifikan, p=0,25) dan ±0,005 pada precision Top 20% (p=0,09). Interval kepercayaan ketiga model saling tumpang tindih, jadi jangan membaca selisih di tabel di atas sebagai kemenangan yang pasti. Kesimpulan yang aman: **ketiga model setara, dan batas performa ada pada data, bukan pada pilihan algoritma**. Gradient Boosting dipilih sebagai model final karena sedikit unggul dan stabil di CV.
 
@@ -59,9 +64,12 @@ Output: tabel metrik di terminal dan di `reports/` (metrics.csv, confusion matri
 ```
 docs/FP_TSC_Bank_Lead_Scoring_Samuel_Geraldo.pptx   # slide presentasi (ringkasan proyek)
 notebooks/FP_Samuel_Geraldo.ipynb   # analisis lengkap dengan output (Colab)
+docs/threshold/index.html           # figur interaktif threshold (GitHub Pages)
 src/lead_scoring.py                 # pipeline versi skrip
+src/threshold_table.py              # tabel threshold 0,05-0,95 dari model final
+figures/threshold/                  # sumber build figur (kit Anatomy, MIT)
 data/bank.csv
-reports/                            # metrik, confusion matrix, kurva gain, feature importance
+reports/                            # metrik, confusion matrix, kurva gain, feature importance, tabel & figur threshold
 requirements.txt
 LICENSE                             # MIT (kode)
 ```
